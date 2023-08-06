@@ -34,7 +34,7 @@ typedef struct s_data {
     int all_collectibles_collected;
 } t_data;
 
-void draw_player(t_data *data)
+void    draw_player(t_data *data)
 {
     int img_width, img_height;
 
@@ -106,7 +106,7 @@ int check_game_state(t_data *data)
         }
         i++;
     }
-     data->all_collectibles_collected = (count_algae == 0 ? 1 : 0);
+    //  data->all_collectibles_collected = (count_algae == 0 ? 1 : 0);
     return count_algae;
 }
 
@@ -129,11 +129,11 @@ int handle_keypress(int keycode, t_data *data)
         next_x++;
 
     // Check if the next position is valid (not a wall)
-    if (data->map[next_y][next_x] != '1')
+    if (data->map[next_y][next_x] != '1' && data->map[next_y][next_x] != 'E')
     {
         // If the next position contains 'C', change it to '0'
         if (data->map[next_y][next_x] == 'C')
-            data->map[next_y][next_x] = '0';      
+            data->map[next_y][next_x] = '0';
 
         // Clear the player's previous position
         void *floor = mlx_xpm_file_to_image(data->mlx, "./images/floor.xpm", &img_width, &img_height);
@@ -150,22 +150,23 @@ int handle_keypress(int keycode, t_data *data)
         draw_player(data);
     }
      // Check if the player has won the game
-    if (data->map[next_y][next_x] == 'E')
+    if (check_game_state(data) == 0)
     {
-        if (!data->all_collectibles_collected)
-            return (0);
-         data->map[data->player_y][data->player_x] = '0'; // Clear the player's current position
-        data->player_x = next_x; // Update the player's position
-        data->player_y = next_y;
-        draw_map(data); // Redraw the map with the player in the new position
-        mlx_destroy_window(data->mlx, data->win); // Close the window after moving to the "Exit"
-        exit(0);
-        // data->map[data->player_y][data->player_x] = '0'; // Clear the player's current position
-        // data->player_x = next_x; // Update the player's position
-        // data->player_y = next_y;
-        // draw_map(data); // Redraw the map with the player in the new position
-        // mlx_destroy_window(data->mlx, data->win); // Close the window after moving to the "Exit"
-        // exit(0);
+        if (data->map[next_y][next_x] == 'E')
+        {
+            // data->map[data->player_y][data->player_x] = '0'; // Clear the player's current position
+            // data->player_x = next_x; // Update the player's position
+            // data->player_y = next_y;
+            // draw_map(data); // Redraw the map with the player in the new position
+            mlx_destroy_window(data->mlx, data->win); // Close the window after moving to the "Exit"
+            exit(0);
+            // data->map[data->player_y][data->player_x] = '0'; // Clear the player's current position
+            // data->player_x = next_x; // Update the player's position
+            // data->player_y = next_y;
+            // draw_map(data); // Redraw the map with the player in the new position
+            // mlx_destroy_window(data->mlx, data->win); // Close the window after moving to the "Exit"
+            // exit(0);
+        }
     }
     return 0;
 }
