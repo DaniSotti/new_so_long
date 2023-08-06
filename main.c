@@ -5,6 +5,8 @@
 #include "so_long.h"
 #include "get_next_line/get_next_line.h"
 
+//comentario para apagar depois
+
 # define MAP_WIDTH 13
 # define MAP_HEIGHT 5
 # define TILE_SIZE 64
