@@ -5,13 +5,7 @@
 #include "so_long.h"
 #include "get_next_line/get_next_line.h"
 
-//comentario para apagar depois
-
-# define MAP_WIDTH 13
-# define MAP_HEIGHT 5
 # define TILE_SIZE 64
-# define WINDOW_WIDTH (MAP_WIDTH * TILE_SIZE)
-# define WINDOW_HEIGHT (MAP_HEIGHT * TILE_SIZE)
 # define KEY_UP 65362
 # define KEY_DOWN 65364
 # define KEY_LEFT 65361
@@ -28,10 +22,12 @@ typedef struct s_data {
     int bpp;
     int size_line;
     int endian;
-    char map[MAP_HEIGHT][MAP_WIDTH];
+    char **map;
     int player_x;
     int player_y;
     int all_collectibles_collected;
+    int map_width;
+    int map_height;
 } t_data;
 
 void    draw_player(t_data *data)
@@ -51,33 +47,40 @@ void draw_map(t_data *data)
     int img_width, img_height;
 
     i = 0;
-    while (i < MAP_HEIGHT)
+    while (i < data->map_height)
     {
         j = 0;
-        while (j < MAP_WIDTH)
+        while (j < data->map_width)
         {
             int x = j * TILE_SIZE;
             int y = i * TILE_SIZE;
 
-            if (data->map[i][j] == '1')
-            {
-                void *wall = mlx_xpm_file_to_image(data->mlx, "./images/wall.xpm", &img_width, &img_height);
-                mlx_put_image_to_window(data->mlx, data->win, wall, x, y);
-            }
-            else if (data->map[i][j] == 'E')
-            {
-                void *exit = mlx_xpm_file_to_image(data->mlx, "./images/exit.xpm", &img_width, &img_height);
-                mlx_put_image_to_window(data->mlx, data->win, exit, x, y);
-            }
-            else if (data->map[i][j] == 'C')
-            {
-                void *alga = mlx_xpm_file_to_image(data->mlx, "./images/algae.xpm", &img_width, &img_height);
-                mlx_put_image_to_window(data->mlx, data->win, alga, x, y);
-            }
-            else
-            {
-                void *floor = mlx_xpm_file_to_image(data->mlx, "./images/floor.xpm", &img_width, &img_height);
-                mlx_put_image_to_window(data->mlx, data->win, floor, x, y);
+            if (i < data->map_height && j < data->map_width) {
+                if (data->map[i][j] == '1')
+                {
+                    void *wall = mlx_xpm_file_to_image(data->mlx, "./images/wall.xpm", &img_width, &img_height);
+                    mlx_put_image_to_window(data->mlx, data->win, wall, x, y);
+                }
+                else if (data->map[i][j] == 'E')
+                {
+                    void *exit = mlx_xpm_file_to_image(data->mlx, "./images/exit.xpm", &img_width, &img_height);
+                    mlx_put_image_to_window(data->mlx, data->win, exit, x, y);
+                }
+                else if (data->map[i][j] == 'C')
+                {
+                    void *alga = mlx_xpm_file_to_image(data->mlx, "./images/algae.xpm", &img_width, &img_height);
+                    mlx_put_image_to_window(data->mlx, data->win, alga, x, y);
+                }
+                else
+                {
+                    void *floor = mlx_xpm_file_to_image(data->mlx, "./images/floor.xpm", &img_width, &img_height);
+                    mlx_put_image_to_window(data->mlx, data->win, floor, x, y);
+                }
+            // } else {
+            //     // Coordenadas fora dos limites do mapa, desenha um tile de "floor"
+            //     void *floor = mlx_xpm_file_to_image(data->mlx, "./images/floor.xpm", &img_width, &img_height);
+            //     mlx_put_image_to_window(data->mlx, data->win, floor, x, y);
+            // }
             }
 
             j++;
@@ -95,10 +98,10 @@ int check_game_state(t_data *data)
     int count_algae = 0;
 
     i = 0;
-    while (i < MAP_HEIGHT)
+    while (i < data->map_height)
     {
         j = 0;
-        while(j < MAP_WIDTH)
+        while(j < data->map_width)
         {
             if (data->map[i][j] == 'C')
                 count_algae++;
@@ -171,7 +174,6 @@ int handle_keypress(int keycode, t_data *data)
     return 0;
 }
 
-
 int main()
 {
     t_data data;
@@ -184,33 +186,94 @@ int main()
         perror("Error opening the map file");
         return (1);
     }
-    int i = 0;
+
     char *line;
-    while ((line = get_next_line(fd)) && i < MAP_HEIGHT)
-    {
-         int j;
-         j = 0;
-         while (j < MAP_WIDTH)
-         {
-             data.map[i][j] = line[j];
-             if (line[j] == 'P')
-             {
-                 data.player_x = j;
-                 data.player_y = i;
-             }
-             j++;
-         }
-         free(line);
-         i++;
+    int i = 0;
+    int map_width = 0;
+    int map_height = 0;
+
+    // Ler o tamanho do mapa
+    while ((line = get_next_line(fd))) {
+        int line_length = 0; // Inicializar o comprimento da linha
+
+        // Calcular o comprimento da linha até o caractere '\n'
+        while (line[line_length] != '\0' && line[line_length] != '\n') {
+                line_length++;
+        }
+            map_width = line_length;
+        map_height++;
+
+        free(line);
     }
-    close (fd);
+
+    close(fd);
+
+    data.map_width = map_width;
+    data.map_height = map_height;
+    data.map = (char **)malloc(map_height * sizeof(char *));
+    
+    // Alocar espaço para as linhas do mapa
+    i = 0;
+    while (i < map_height) {
+        data.map[i] = (char *)malloc(map_width * sizeof(char));
+        i++;
+    }
+
+    fd = open("maps/test.ber", O_RDONLY);
+    i = 0;
+    while ((line = get_next_line(fd))) {
+        int line_length = 0; // Inicializar o comprimento da linha
+
+        // Calcular o comprimento da linha até o caractere '\n'
+        while (line[line_length] != '\0' && line[line_length] != '\n') {
+            line_length++;
+        }
+
+        int j = 0;
+        while (j < map_width) {
+            if (j < line_length) {
+                data.map[i][j] = line[j];
+            } else {
+                data.map[i][j] = ' '; // Preencher com espaços em branco
+            }
+            j++;
+        }
+        data.map[i][j] = '\0'; // Adicionar o caractere nulo no final da linha
+        free(line);
+        i++;
+    }
+    close(fd);
+
     data.mlx = mlx_init();
-    data.win = mlx_new_window(data.mlx, MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE, "Map Display");
+    data.win = mlx_new_window(data.mlx, map_width * TILE_SIZE, map_height * TILE_SIZE, "Map Display");
+
+    // Find initial player position
+    i = 0;
+    while (i < map_height) {
+        int j = 0;
+        while (j < map_width) {
+            if (data.map[i][j] == 'P') {
+                data.player_x = j;
+                data.player_y = i;
+                break;
+            }
+            j++;
+        }
+        i++;
+    }
 
     draw_map(&data);
     // Register the handle_keypress function as the keyboard event handler
     mlx_hook(data.win, 2, 1L << 0, handle_keypress, &data);
     mlx_loop(data.mlx);
 
+    // Liberar memória alocada para o mapa
+    i = 0;
+    while (i < map_height) {
+        free(data.map[i]);
+        i++;
+    }
+    free(data.map);
+
     return 0;
-} 
+}
