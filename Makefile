@@ -35,13 +35,17 @@ LIBFT = $(LIBFT_DIR)/libft.a
 GNL_DIR = get_next_line
 GNL_SRCS = $(GNL_DIR)/get_next_line.c $(GNL_DIR)/get_next_line_utils.c
 
+PRTF_DIR = ft_printf
+PRTF_SRCS = $(PRTF_DIR)/ft_printf.c $(PRTF_DIR)/ft_numbers.c \
+$(PRTF_DIR)/ft_putchar.c $(PRTF_DIR)/ft_putstr.c
+
 all: $(LIBFT) $(NAME)
 
 %.o: %.c
 	$(CC) $(CC_FLAGS) $(MLX_LINUX) -c $< -o $@
 
 $(NAME): $(O_FILES) $(LIBFT)
-	$(CC) $(CC_FLAGS) $(O_FILES) $(GNL_SRCS) $(MLXFLAGS) -L$(LIBFT_DIR) -lft -o $(NAME)
+	$(CC) $(CC_FLAGS) $(O_FILES) $(GNL_SRCS) $(PRTF_SRCS) $(MLXFLAGS) -L$(LIBFT_DIR) -lft -o $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR)
