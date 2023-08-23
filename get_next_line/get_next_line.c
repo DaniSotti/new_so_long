@@ -26,7 +26,7 @@ char	*get_next_line(int fd)
 	is_nline = 0;
 	while (!is_nline && (buffer[0] || read(fd, buffer, BUFFER_SIZE) > 0))
 	{
-		temp = ft_strjoin(temp, buffer);
+		temp = ft_joinstr(temp, buffer);
 		i = 0;
 		j = 0;
 		while (buffer[i])

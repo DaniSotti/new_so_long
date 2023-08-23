@@ -15,7 +15,7 @@ NAME = get_next_line.a
 SRC = get_next_line \
 	get_next_line_utils
 
-CC = gcc
+CC = cc
 RM = rm -f
 CFLAGS = -Wall -Werror -Wextra -I.
 

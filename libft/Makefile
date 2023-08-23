@@ -42,7 +42,7 @@ O_BONUS = $(C_BONUS:.c=.o)
 O_FILES = $(C_SOURCE:.c=.o)
 
 #Compiler
-CC = gcc
+CC = cc
 CC_FLAGS = -Wall -Werror -Wextra -g -I incs
 
 all: $(NAME)

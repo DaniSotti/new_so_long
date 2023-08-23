@@ -12,44 +12,44 @@
 
 #include "get_next_line.h"
 
-int	ft_strlen(char *str)
+ int	count_str(char *str)
+ {
+ 	int	i;
+
+ 	i = 0;
+ 	if (!str)
+ 		return (0);
+ 	while (str[i] && str[i] != '\n')
+ 		i++;
+ 	if (str[i] == '\n')
+ 		i++;
+ 	return (i);
+ }
+
+char	*ft_joinstr(char *temp, char *buffer)
 {
-	int	i;
+ 	char	*newstr;
+ 	int		i;
+ 	int		j;
 
-	i = 0;
-	if (!str)
-		return (0);
-	while (str[i] && str[i] != '\n')
-		i++;
-	if (str[i] == '\n')
-		i++;
-	return (i);
-}
-
-char	*ft_strjoin(char *temp, char *buffer)
-{
-	char	*newstr;
-	int		i;
-	int		j;
-
-	newstr = malloc(ft_strlen(temp) + ft_strlen(buffer) + 1);
-	i = 0;
-	j = 0;
-	if (!newstr)
-		return (NULL);
-	while (temp && temp[i])
-		newstr[j++] = temp[i++];
-	free (temp);
-	i = 0;
-	while (buffer && buffer[i])
-	{
-		newstr[j++] = buffer[i];
-		if (buffer[i++] == '\n')
-			break ;
-	}
-	newstr[j] = '\0';
-	return (newstr);
-}
+ 	newstr = malloc(count_str(temp) + count_str(buffer) + 1);
+ 	i = 0;
+ 	j = 0;
+ 	if (!newstr)
+ 		return (NULL);
+ 	while (temp && temp[i])
+ 		newstr[j++] = temp[i++];
+ 	free (temp);
+ 	i = 0;
+ 	while (buffer && buffer[i])
+ 	{
+ 		newstr[j++] = buffer[i];
+ 		if (buffer[i++] == '\n')
+ 			break ;
+ 	}
+ 	newstr[j] = '\0';
+ 	return (newstr);
+ }
 
 char	*ft_clean_buffer(char *buffer)
 {

@@ -24,8 +24,8 @@
 # endif
 
 char	*get_next_line(int fd);
-int		ft_strlen(char *str);
-char	*ft_strjoin(char *temp, char *buffer);
+int		count_str(char *str);
+char	*ft_joinstr(char *temp, char *buffer);
 char	*ft_clean_buffer(char *buffer);
 
 #endif

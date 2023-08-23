@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "so_long.h"
-#include "get_next_line/get_next_line.h"
+#include "libft/incs/libft.h"
+// #include "get_next_line/get_next_line.h"
 
 # define TILE_SIZE 64
 # define KEY_UP 65362
@@ -14,6 +15,7 @@
 # define KEY_S 115
 # define KEY_D 100
 # define KEY_W 119
+# define KEY_ESC 65307
 # define PLAYER "./images/tardigrade.xpm"
 
 typedef struct s_data {
@@ -157,7 +159,12 @@ int handle_keypress(int keycode, t_data *data)
         next_x--;
     else if (keycode == KEY_RIGHT || keycode == KEY_D)
         next_x++;
-
+	else if (keycode == KEY_ESC)
+	{
+		ft_printf("Ohhh! You gave up :( \n");
+		free (data->map);
+		exit (0);
+	}
     // Check if the next position is valid (not a wall)
     if (data->map[next_y][next_x] != '1' && data->map[next_y][next_x] != 'E')
     {
@@ -185,7 +192,7 @@ int handle_keypress(int keycode, t_data *data)
         if (data->map[next_y][next_x] == 'E')
         {
             ft_printf("You win :) \n");
-            mlx_destroy_window(data->mlx, data->win); // Close the window after moving to the "Exit"
+            // mlx_destroy_window(data->mlx, data->win); // Close the window after moving to the "Exit"
             exit(0);
         }
     }
@@ -372,6 +379,21 @@ void player_initial_position(t_data *data)
     }
 }
 
+int handle_window_close(t_data *data)
+{
+    // Clean up resources and exit the program
+    ft_printf("Ohhh! You gave up :(\n");
+    free(data->map);
+    exit(0);
+    return 0;
+}
+
+int handle_expose(t_data *data)
+{
+    draw_map(data);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     t_data data;
@@ -381,11 +403,11 @@ int main(int argc, char **argv)
 
     if (argc != 2)
     {
-        ft_printf("you should choose the map like this: maps/mapname.ber \n");
+        ft_printf("you need to choose the map name \n");
         return (1);
     }
-
-    data.map_path = argv[1];
+    data.map_path = ft_strjoin("maps/", argv[1]);
+    data.map_path = ft_strjoin(data.map_path, ".ber");
     data.fd = open(data.map_path, O_RDONLY);
     if (data.fd == -1)
     {
@@ -408,11 +430,13 @@ int main(int argc, char **argv)
 
     data.mlx = mlx_init();
     data.win = mlx_new_window(data.mlx, data.map_width * TILE_SIZE, data.map_height * TILE_SIZE, "So Long");
-
-    draw_map(&data);
+    
     // Register the handle_keypress function as the keyboard event handler
     mlx_hook(data.win, 2, 1L << 0, handle_keypress, &data);
+	mlx_hook(data.win, 17, 1L << 0, handle_window_close, &data);
+	mlx_hook(data.win, 12, 1L << 15, handle_expose, &data);
     mlx_loop(data.mlx);
+	draw_map(&data);
 
     // Liberar memória alocada para o mapa
     int i = 0;
