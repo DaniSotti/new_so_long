@@ -19,4 +19,8 @@
 # include "ft_printf/ft_printf.h"
 # include <unistd.h>
 
+int is_wall(char **map, int x, int y);
+
+
+
 #endif
