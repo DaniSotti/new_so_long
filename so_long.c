@@ -573,3 +573,272 @@ int render_moves(t_data *data)
 	return (0);
 	//--------------------------//
 }
+
+
+
+
+
+int	check_valid_caracteres(t_data *data)
+{
+	int	player_count;
+	int	exit_count;
+	int	collectible_count;
+	int	i;
+	int	j;
+
+	player_count = 0;
+	exit_count = 0;
+	collectible_count = 0;
+	i = 0;
+	while (i < data->map_height)
+	{
+		j = 0;
+		while (j < data->map_width)
+		{
+			if (data->map[i][j] == 'P')
+				player_count++;
+			else if (data->map[i][j] == 'E')
+				exit_count++;
+			else if (data->map[i][j] == 'C')
+				collectible_count++;
+			j++;
+		}
+		i++;
+	}
+	if (player_count != 1 || exit_count != 1 || collectible_count == 0)
+	{
+		ft_printf("Something wrong.\n");
+		return (1);
+	}
+	return (0);
+}
+
+
+
+
+
+
+
+
+
+
+
+//  int	can_reach_collectibles_and_exit(t_data *data, int start_x, int start_y)
+//  {
+//  	int	queue_size;
+//  	int	front;
+//  	int	rear;
+//  	int	visited[data->map_height][data->map_width];
+//  	int	current_x;
+//  	int current_y;
+// 	queue_size = data->map_width * data->map_height;
+//  	front = 0;
+//  	rear = 0;
+//      ft_memset(visited, 0, sizeof(visited));
+//  	int	queue[queue_size][2];
+//      queue[rear][0] = start_x;
+//      queue[rear][1] = start_y;
+//      rear++;
+//      visited[start_y][start_x] = 1;
+//      int dx[] = {0, 0, -1, 1};
+//      int dy[] = {-1, 1, 0, 0};
+//      while (front < rear)
+//      {
+//          current_x = queue[front][0];
+//          current_y = queue[front][1];
+//          front++;
+//  		if (data->map[current_y][current_x] == 'C' || data->map[current_y][current_x] == 'E')
+//              visited[current_y][current_x] = 1;
+//          int i = 0; 
+//  		while (i < 4)
+//          {
+//              int new_x = current_x + dx[i];
+//              int new_y = current_y + dy[i];
+//             // Verifica se a nova posição é válida e não é uma parede ('1')
+//              if (new_x >= 0 && new_x < data->map_width &&
+//                  new_y >= 0 && new_y < data->map_height &&
+//                  data->map[new_y][new_x] != '1' &&
+//                  !visited[new_y][new_x])
+//              {
+//                  queue[rear][0] = new_x;
+//                  queue[rear][1] = new_y;
+//                  rear++;
+//                  visited[new_y][new_x] = 1;
+//              }
+//  			i++;
+//          }
+//      }
+//  	int i = 0;
+//      while (i < data->map_height)
+//      {
+//          int j = 0;
+//  		while (j < data->map_width)
+//          {
+//              if ((data->map[i][j] == 'C' || data->map[i][j] == 'E') && !visited[i][j])
+//                  return 0;
+//  			j++;
+//          }
+//  		i++;
+//      }
+//      return (1);
+//  }
+
+
+//  int	can_reach_collectibles_and_exit(t_data *data)
+// {
+// 	// int	queue_size;
+// 	// int	front;
+// 	// int	rear;
+// 	// int	visited[data->map_height][data->map_width];
+// 	// int	current_x;
+// 	// int current_y;
+
+// 	// queue_size = data->map_width * data->map_height;
+// 	// front = 0;
+// 	// rear = 0;
+//     // ft_memset(visited, 0, sizeof(visited));
+// 	// int	queue[queue_size][2];
+//     // queue[rear][0] = start_x;
+//     // queue[rear][1] = start_y;
+//     // rear++;
+//     // visited[start_y][start_x] = 1;
+//     // int dx[] = {0, 0, -1, 1};
+//     // int dy[] = {-1, 1, 0, 0};
+//     // while (front < rear)
+//     // {
+//     //     current_x = queue[front][0];
+//     //     current_y = queue[front][1];
+//     //     front++;
+// 	// 	if (data->map[current_y][current_x] == 'C' || data->map[current_y][current_x] == 'E')
+//     //         visited[current_y][current_x] = 1;
+//     //     int i = 0; 
+// 	// 	while (i < 4)
+//     //     {
+//     //         int new_x = current_x + dx[i];
+//     //         int new_y = current_y + dy[i];
+
+//     //         // Verifica se a nova posição é válida e não é uma parede ('1')
+//     //         if (new_x >= 0 && new_x < data->map_width &&
+//     //             new_y >= 0 && new_y < data->map_height &&
+//     //             data->map[new_y][new_x] != '1' &&
+//     //             !visited[new_y][new_x])
+//     //         {
+//     //             queue[rear][0] = new_x;
+//     //             queue[rear][1] = new_y;
+//     //             rear++;
+//     //             visited[new_y][new_x] = 1;
+//     //         }
+// 	// 		i++;
+//     //     }
+//     // }
+
+//  	int collectible_count;
+//  	int exit;
+//  	collectible_count = data->collectible_count;
+//  	exit = data->exit_count;
+//  	int i = 0;
+//      while (i < data->map_height)
+//      {
+//         int j = 0;
+//  		while (j < data->map_width)
+//          {
+//             if (data->map[i][j] == 'C')
+//  				collectible_count--;
+//  			else if (data->map[i][j] == 'E')
+//  				exit--;
+// 			data->map[i][j] == 'F';
+//  			j++;
+//         }
+//  		i++;
+//      }
+//  	if (collectible_count == 0 && exit == 0)
+//  		return (1);
+//  	else
+//      	return (0);
+//  }
+
+
+//  int is_collectible_blocked(t_data *data) {
+//  	//Eu vou na posicao pra cima pra baixo e para os lados verificando se tenho 1 e retorno erro caso sim
+// 	int x = 0, y = 0;
+//     int blocked_collectible_count = 0;
+
+// 	 	while (y < data->map_height) {
+//         x = 0;
+//         while (x < data->map_width) {
+// 			if (data->map[y][x] == 'C') {
+// 			  if (x > 0 && data->map[y][x - 1] == '1' &&
+//                     x < data->map_width - 1 && data->map[y][x + 1] == '1' &&
+//                     y > 0 && data->map[y - 1][x] == '1' &&
+//                     y < data->map_height - 1 && data->map[y + 1][x] == '1') {
+//                     blocked_collectible_count++;
+//                 }
+// 			}
+// 		}
+// 	}
+	
+//     return blocked_collectible_count;
+//  }
+
+// int count_blocked_exits(t_data *data) {
+//     int x = 0, y = 0;
+//     int blocked_exit_count = 0;
+
+//     while (y < data->map_height) {
+//         x = 0;
+//         while (x < data->map_width) {
+//             if (data->map[y][x] == 'E') {
+//                 // Verifica se a saída está bloqueada em todas as direções.
+//                 if (x > 0 && data->map[y][x - 1] == '1' &&
+//                     x < data->map_width - 1 && data->map[y][x + 1] == '1' &&
+//                     y > 0 && data->map[y - 1][x] == '1' &&
+//                     y < data->map_height - 1 && data->map[y + 1][x] == '1') {
+//                     blocked_exit_count++;
+//                 }
+//             }
+//             x++;
+//         }
+//         y++;
+//     }
+
+//     return blocked_exit_count;
+// }
+
+// void check_path(t_data *data, int x, int y);
+
+// void path_mark(t_data *data, int x, int y)
+// {
+// 	if (x >= 0 && x < data->map_width && y >= 0 && y < data->map_height)
+// 	{
+// 		// x, y é a posição do meu player
+// 		if (data->map[y][x] == 'P')
+// 			data->map[y][x] = 'p';
+// 		if (data->map[y][x] == 'C')
+// 		{
+// 			data->map[y][x] = 'c';
+// 			data->collectibles++;
+// 		}
+// 		if (data->map[y][x] == '0')
+// 			data->map[y][x] = 'o';
+// 		if (data->map[y][x] == 'E')
+// 		{
+// 			data->map[y][x] = 'e';
+// 			data->exit++;
+// 		}
+// 		else
+// 		{
+// 			check_path(data, x + 1, y);
+// 			check_path(data, x - 1, y);
+// 			check_path(data, x, y + 1);
+// 			check_path(data, x, y - 1);
+// 		}
+// 	}
+// }
+
+// void check_path(t_data *data, int x, int y)
+// {
+// 	if (data->map[y][x] == 'P' || data->map[y][x] == 'E' || data->map[y][x] == 'C' || data->map[y][x] == '0')
+// 	{
+// 		path_mark(data, x, y);
+// 	}
+// }
