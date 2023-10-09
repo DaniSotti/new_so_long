@@ -29,7 +29,6 @@
 #define KEY_W 119
 #define KEY_ESC 65307
 #define BLACK_BAR_HEIGHT 30
-// # define PLAYER "./images/tardigrade.xpm"
 
 typedef struct s_data {
 	void	*mlx;
@@ -49,8 +48,6 @@ typedef struct s_data {
 	int		collectible_count;
 	int		exit_count;
 	int		player_count;
-	int		exit;
-	int		collectibles;
 	char	**temp_map;
 }	t_data;
 
@@ -65,7 +62,6 @@ void	ft_clean_map(t_data *data, char **map)
 		i++;
 	}
 	free(map);
-	// free(data->map_path);
 }
 
 void	draw_image(t_data *data, char *image_path, int x, int y)
@@ -177,21 +173,20 @@ void	draw_new_exit(t_data *data)
 	}
 }
 
-int exit_game(t_data *data)
+int	exit_game(t_data *data)
 {
-    ft_printf("Ohhh! You gave up :( \n");
+	ft_printf("Ohhh! You gave up :( \n");
 	if (data->mlx)
 	{
 		mlx_destroy_window(data->mlx, data->win);
 		mlx_destroy_display(data->mlx);
 	}
-    if (data->map_path)
-        free(data->map_path);
-    ft_clean_map(data, data->map);
-    ft_clean_map(data, data->temp_map);
-    exit(0);
+	if (data->map_path)
+		free(data->map_path);
+	ft_clean_map(data, data->map);
+	ft_clean_map(data, data->temp_map);
+	exit(0);
 }
-
 
 void	calculate_next_position(int keycode, t_data *data)
 {
@@ -376,6 +371,9 @@ void	valid_character(t_data *data)
 	}
 }
 
+//Na escola nao precisa fazer esta validacao
+// if (line[line_length] == '\n')
+		// 	line_length--;
 void	count_size_map(t_data *data)
 {
 	char	*line;
@@ -389,8 +387,6 @@ void	count_size_map(t_data *data)
 	{
 		while (line[line_length] != '\0' && line[line_length] != '\n')
 			line_length++;
-		if (line[line_length] == '\n')
-			line_length--;
 		if (data->map_width > 0 && line_length != data->map_width)
 		{
 			ft_printf("Map Error \n");
@@ -401,6 +397,7 @@ void	count_size_map(t_data *data)
 		free(line);
 		line = get_next_line(data->fd);
 	}
+	free(line);
 }
 
 char	**create_map(t_data *data)
@@ -523,33 +520,35 @@ void	check_path(t_data *data, int x, int y)
 		mark_path(data, x, y);
 }
 
-int init_game(t_data *data, char *map_name)
+int	init_game(t_data *data, char *map_name)
 {
-    data->player_x = 0;
-    data->player_y = 0;
-    data->moves = 0;
-    data->prev_mov_int = 0;
-    char *s = ft_strjoin("maps/", map_name);
+	char	*s;
+
+	data->player_x = 0;
+	data->player_y = 0;
+	data->moves = 0;
+	data->prev_mov_int = 0;
+	s = ft_strjoin("maps/", map_name);
 	data->map_path = ft_strjoin(s, ".ber");
 	free(s);
-    if (data->map_path == NULL)
-    {
-        perror("Error creating map path");
-        return (1);
-    }
-    if (data->map_path == NULL)
-    {
-        perror("Error creating map path");
-        return (1);
-    }
-    data->fd = open(data->map_path, O_RDONLY);
-    if (data->fd == -1)
-    {
-        perror("Error opening the map file");
+	if (data->map_path == NULL)
+	{
+		perror("Error creating map path");
+		return (1);
+	}
+	if (data->map_path == NULL)
+	{
+		perror("Error creating map path");
+		return (1);
+	}
+	data->fd = open(data->map_path, O_RDONLY);
+	if (data->fd == -1)
+	{
+		perror("Error opening the map file");
 		free(data->map_path);
-        return (1);
-    }
-    return (0);
+		return (1);
+	}
+	return (0);
 }
 
 void	check_elements(t_data *data)
@@ -596,7 +595,8 @@ int	main(int argc, char **argv)
 	draw_map(&data);
 	ft_clean_map(&data, data.map);
 	ft_clean_map(&data, data.temp_map);
-	// mlx_destroy_window(data.mlx, data.win);
-	// mlx_destroy_display(data.mlx);
 	return (0);
 }
+
+	// mlx_destroy_window(data.mlx, data.win); 
+	// mlx_destroy_display(data.mlx);            
