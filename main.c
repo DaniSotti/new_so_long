@@ -56,12 +56,20 @@ void	ft_clean_map(t_data *data, char **map)
 	int	i;
 
 	i = 0;
-	while (i < data->map_height)
+	if (map != NULL)
 	{
-		free(map[i]);
-		i++;
+		while (i < data->map_height)
+		{
+			free(map[i]);
+			i++;
+		}
+		free(map);
 	}
-	free(map);
+	// free(data->mlx);
+	// if (data->map_path != NULL)
+	// {
+	// 	free(data->map_path);
+	// }
 }
 
 void	draw_image(t_data *data, char *image_path, int x, int y)
@@ -287,7 +295,10 @@ int	is_map_surrounded_by_walls(t_data *data)
 	{
 		if (!is_wall(data->map, 0, i) || !is_wall(data->map,
 				data->map_width - 1, i))
+		{
+			// ft_clean_map(data, data->map);
 			return (0);
+		}
 		i++;
 	}
 	j = 0;
@@ -295,7 +306,10 @@ int	is_map_surrounded_by_walls(t_data *data)
 	{
 		if (!is_wall(data->map, j, 0) || !is_wall(data->map, j,
 				data->map_height - 1))
+		{
+			//ft_clean_map(data, data->map);
 			return (0);
+		}
 		j++;
 	}
 	return (1);
@@ -334,6 +348,7 @@ static void	check_counts(t_data *data, int height, int width)
 		data->map[height][width] != '\n')
 	{
 		ft_printf("There are different map caracteres.\n");
+		// ft_clean_map(data, data->map);
 		exit (1);
 	}
 	if (data->map[height][width] == 'C')
@@ -367,6 +382,7 @@ void	valid_character(t_data *data)
 			|| data->collectible_count == 0))
 	{
 		ft_printf("Something wrong.\n");
+		// ft_clean_map(data, data->map);
 		exit (1);
 	}
 }
@@ -390,6 +406,7 @@ void	count_size_map(t_data *data)
 		if (data->map_width > 0 && line_length != data->map_width)
 		{
 			ft_printf("Map Error \n");
+			// ft_clean_map(data, data->map);
 			exit(1);
 		}
 		data->map_width = line_length;
@@ -421,7 +438,7 @@ char	**create_map(t_data *data)
 		i++;
 		line = get_next_line(data->fd);
 	}
-	close(data->fd);
+	// close(data->fd);
 	map[i] = NULL;
 	return (map);
 }
@@ -520,7 +537,7 @@ void	check_path(t_data *data, int x, int y)
 		mark_path(data, x, y);
 }
 
-int	init_game(t_data *data, char *map_name)
+void	init_game(t_data *data, char *map_name)
 {
 	char	*s;
 
@@ -533,22 +550,19 @@ int	init_game(t_data *data, char *map_name)
 	free(s);
 	if (data->map_path == NULL)
 	{
-		perror("Error creating map path");
-		return (1);
-	}
-	if (data->map_path == NULL)
-	{
-		perror("Error creating map path");
-		return (1);
+		ft_printf("Error creating map path\n");
+		// free(data->map_path);
+		exit (1);
 	}
 	data->fd = open(data->map_path, O_RDONLY);
 	if (data->fd == -1)
 	{
-		perror("Error opening the map file");
+		ft_printf("Error opening the map file.\n");
+		close(data->fd);
 		free(data->map_path);
-		return (1);
+		exit (1);
 	}
-	return (0);
+	// return (0);
 }
 
 void	check_elements(t_data *data)
@@ -575,11 +589,11 @@ int	main(int argc, char **argv)
 	if (argc != 2)
 	{
 		ft_printf("you need to choose the map name \n");
-		exit(1);
+		return (1);
 	}
 	init_game(&data, argv[1]);
 	count_size_map(&data);
-	close(data.fd);
+	// close(data.fd);
 	data.map = create_map(&data);
 	player_initial_position(&data);
 	data.temp_map = create_map(&data);
