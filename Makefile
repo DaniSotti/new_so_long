@@ -16,7 +16,9 @@ NAME = so_long
 # Compiler
 CC = cc
 CC_FLAGS = -Wall -Wextra -Werror
-MLXFLAGS = -Lmlx_linux -lmlx_Linux -L/usr/lib -Imlx_linux -lXext -lX11 -lm -lz
+MLXFLAGS = -Lmlx_linux -lmlx_Linux -L/usr/lib -Imlx_linux -lXext -lX11 -lm -lz 
+
+# -fsanitize=address
 
 MLX_LINUX = -I/usr/include -Imlx_linux -O3
 

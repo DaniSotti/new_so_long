@@ -10,61 +10,44 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "mlx_linux/mlx.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "so_long.h"
-#include "libft/incs/libft.h"
-// #include "get_next_line/get_next_line.h"
 
-#define TILE_SIZE 32
-#define KEY_UP 65362
-#define KEY_DOWN 65364
-#define KEY_LEFT 65361
-#define KEY_RIGHT 65363
-#define KEY_A 97
-#define KEY_S 115
-#define KEY_D 100
-#define KEY_W 119
-#define KEY_ESC 65307
-#define BLACK_BAR_HEIGHT 30
-
-typedef struct s_data {
-	void	*mlx;
-	void	*win;
-	char	**map;
-	int		player_x;
-	int		player_y;
-	int		map_width;
-	int		map_height;
-	int		fd;
-	char	*map_path;
-	int		moves;
-	int		next_x;
-	int		next_y;
-	int		player_direction;
-	int		prev_mov_int;
-	int		collectible_count;
-	int		exit_count;
-	int		player_count;
-	char	**temp_map;
-}	t_data;
-
-void	ft_clean_map(t_data *data, char **map)
+void	ft_clean_map(t_data *data)
 {
 	int	i;
 
 	i = 0;
-	if (map != NULL)
+	if (data->map != NULL)
 	{
 		while (i < data->map_height)
 		{
-			free(map[i]);
+			free(data->map[i]);
 			i++;
 		}
-		free(map);
+		free(data->map);
 	}
+
+	if (data->temp_map != NULL)
+	{
+		while (i < data->map_height)
+		{
+			free(data->temp_map[i]);
+			i++;
+		}
+		free(data->temp_map);
+	}
+
+	if (data->map_path)
+	{
+		free(data->map_path);
+	}
+
+	if (data->mlx) {
+		mlx_clear_window(data->mlx, data->win);
+        mlx_destroy_window(data->mlx, data->win);
+        mlx_destroy_display(data->mlx);
+		free(data->mlx);
+    }
 	// free(data->mlx);
 	// if (data->map_path != NULL)
 	// {
@@ -102,13 +85,16 @@ void	render_moves(t_data *data)
 	mlx_string_put(data->mlx, data->win, moves_x, moves_y, 0xFFFFFF, "Moves:");
 	moves_str = ft_itoa(data->moves);
 	data->prev_mov_int = data->moves;
+	if (data->prev_mov_int > 0)
+		ft_printf("MOVES: %d\n", data->moves);
+	data->moves++;
 	mlx_string_put(data->mlx, data->win, moves_x + moves_str_width + 10,
 		moves_y, 0xFFFFFF, moves_str);
 	free(moves_str);
 	free(prev_mov_char);
 }
 
-void	draw_map(t_data *data)
+int	draw_map(t_data *data)
 {
 	int		i;
 	int		j;
@@ -135,6 +121,7 @@ void	draw_map(t_data *data)
 	}
 	draw_image(data, "./images/tardigrade_front.xpm", data->player_x,
 		data->player_y);
+	return (0);
 }
 
 int	check_game_state(t_data *data)
@@ -184,16 +171,8 @@ void	draw_new_exit(t_data *data)
 int	exit_game(t_data *data)
 {
 	ft_printf("Ohhh! You gave up :( \n");
-	if (data->mlx)
-	{
-		mlx_destroy_window(data->mlx, data->win);
-		mlx_destroy_display(data->mlx);
-	}
-	if (data->map_path)
-		free(data->map_path);
-	ft_clean_map(data, data->map);
-	ft_clean_map(data, data->temp_map);
-	exit(0);
+	ft_clean_map(data);
+	exit(EXIT_SUCCESS);
 }
 
 void	calculate_next_position(int keycode, t_data *data)
@@ -224,12 +203,6 @@ int	is_valid_move(int keycode, t_data *data)
 		return (0);
 	return (data->map[data->next_y][data->next_x] != '1' &&
 		data->map[data->next_y][data->next_x] != 'E');
-}
-
-void	update_moves(t_data *data)
-{
-	data->moves++;
-	ft_printf("MOVES: %d\n", data->moves);
 }
 
 void	clear_update_position(t_data *data)
@@ -263,7 +236,6 @@ int	handle_keypress(int keycode, t_data *data)
 	calculate_next_position(keycode, data);
 	if (is_valid_move(keycode, data))
 	{
-		update_moves(data);
 		render_moves(data);
 		clear_update_position(data);
 		if (check_game_state(data) == 0)
@@ -273,19 +245,15 @@ int	handle_keypress(int keycode, t_data *data)
 	{
 		if (data->map[data->next_y][data->next_x] == 'E')
 		{
+			ft_printf("MOVES: %d\n", data->moves);
 			ft_printf("You win :) \n");
-			exit(0);
+			exit(EXIT_SUCCESS);
 		}
 	}
 	return (0);
 }
 
-int	is_wall(char **map, int x, int y)
-{
-	return (map[y][x] == '1');
-}
-
-int	is_map_surrounded_by_walls(t_data *data)
+void	is_map_surrounded_by_walls(t_data *data)
 {
 	int	i;
 	int	j;
@@ -293,26 +261,24 @@ int	is_map_surrounded_by_walls(t_data *data)
 	i = 0;
 	while (i < data->map_height)
 	{
-		if (!is_wall(data->map, 0, i) || !is_wall(data->map,
-				data->map_width - 1, i))
+		if ((data->map[i][0] != '1') 
+			|| (data->map[i][data->map_width - 1] != '1'))
 		{
-			// ft_clean_map(data, data->map);
-			return (0);
+			ft_printf("The map is not surrounded by walls.\n");
+			exit (EXIT_FAILURE);
 		}
 		i++;
 	}
 	j = 0;
 	while (j < data->map_width)
 	{
-		if (!is_wall(data->map, j, 0) || !is_wall(data->map, j,
-				data->map_height - 1))
+		if ((data->map[0][j] != '1') || (data->map[data->map_height - 1][j] != '1'))
 		{
-			//ft_clean_map(data, data->map);
-			return (0);
+			ft_printf("The map is not surrounded by walls.\n");
+			exit (EXIT_FAILURE);
 		}
 		j++;
 	}
-	return (1);
 }
 
 // int	check_line_length(t_data *data)
@@ -349,7 +315,7 @@ static void	check_counts(t_data *data, int height, int width)
 	{
 		ft_printf("There are different map caracteres.\n");
 		// ft_clean_map(data, data->map);
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (data->map[height][width] == 'C')
 		data->collectible_count++;
@@ -381,15 +347,19 @@ void	valid_character(t_data *data)
 	if ((data->player_count != 1 || data->exit_count != 1
 			|| data->collectible_count == 0))
 	{
+		ft_printf("%d, %d, %d", data->map_height, data->exit_count, data->collectible_count);
 		ft_printf("Something wrong.\n");
 		// ft_clean_map(data, data->map);
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 }
 
 //Na escola nao precisa fazer esta validacao
 // if (line[line_length] == '\n')
 		// 	line_length--;
+
+
+
 void	count_size_map(t_data *data)
 {
 	char	*line;
@@ -403,11 +373,13 @@ void	count_size_map(t_data *data)
 	{
 		while (line[line_length] != '\0' && line[line_length] != '\n')
 			line_length++;
+		if (line[line_length] == '\n')
+		 	line_length--;
 		if (data->map_width > 0 && line_length != data->map_width)
 		{
 			ft_printf("Map Error \n");
 			// ft_clean_map(data, data->map);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 		data->map_width = line_length;
 		data->map_height++;
@@ -438,7 +410,8 @@ char	**create_map(t_data *data)
 		i++;
 		line = get_next_line(data->fd);
 	}
-	// close(data->fd);
+	free(line);
+	close(data->fd);
 	map[i] = NULL;
 	return (map);
 }
@@ -466,52 +439,6 @@ void	player_initial_position(t_data *data)
 	}
 }
 
-// int	handle_window_close(t_data *data)
-// {
-// 	ft_printf("Ohhh! You gave up :(\n");
-// 	free(data->map);
-// 	exit(0);
-// 	return (0);
-// }
-
-int	handle_expose(t_data *data)
-{
-	draw_map(data);
-	return (0);
-}
-
-// void	clone_map(t_data *data)
-// {
-// 	char	*line;
-// 	int		i;
-// 	int		j;
-
-// 	data->temp_map = (char **)malloc(data->map_height * sizeof(char *));
-// 	i = 0;
-// 	while (i < data->map_height)
-// 		data->temp_map[i++] = (char *)malloc(data->map_width * sizeof(char));
-// 	data->fd = open(data->map_path, O_RDONLY);
-// 	i = 0;
-// 	line = get_next_line(data->fd);
-// 	while (line)
-// 	{
-// 		j = 0;
-// 		while (j < data->map_width)
-// 		{
-// 			data->temp_map[i][j] = line[j];
-// 			j++;
-// 		}
-// 		data->temp_map[i][j] = '\0';
-// 		free(line);
-// 		i++;
-// 		line = get_next_line(data->fd);
-// 	}
-// 	close(data->fd);
-// }
-
-void	mark_path(t_data *data, int x, int y);
-void	check_path(t_data *data, int x, int y);
-
 void	mark_path(t_data *data, int x, int y)
 {
 	if (x < 0 || x >= data->map_width || y < 0 || y >= data->map_height
@@ -537,6 +464,19 @@ void	check_path(t_data *data, int x, int y)
 		mark_path(data, x, y);
 }
 
+// int open_map_file(char *map_name, char **map_path) {
+//     char *s = ft_strjoin("maps/", map_name);
+//     *map_path = ft_strjoin(s, ".ber");
+//     free(s);
+
+//     int fd = open(*map_path, O_RDONLY);
+//     if (fd == -1) {
+//         ft_printf("Error opening the map file.\n");
+//         exit(1);
+//     }
+//     return fd;
+// }
+
 void	init_game(t_data *data, char *map_name)
 {
 	char	*s;
@@ -552,7 +492,7 @@ void	init_game(t_data *data, char *map_name)
 	{
 		ft_printf("Error creating map path\n");
 		// free(data->map_path);
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	data->fd = open(data->map_path, O_RDONLY);
 	if (data->fd == -1)
@@ -560,25 +500,21 @@ void	init_game(t_data *data, char *map_name)
 		ft_printf("Error opening the map file.\n");
 		close(data->fd);
 		free(data->map_path);
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
-	// return (0);
 }
 
 void	check_elements(t_data *data)
 {
 	valid_character(data);
-	if (!is_map_surrounded_by_walls(data))
-	{
-		ft_printf("The map is not surrounded by walls.\n");
-		exit (1);
-	}
+	is_map_surrounded_by_walls(data);
+	
 	check_path(data, data->player_x, data->player_y);
 	if (data->exit_count != 0 || data->collectible_count != 0)
 	{
 		ft_printf("Player blocked.\n");
-		ft_clean_map(data, data->temp_map);
-		exit (1);
+		// ft_clean_map(data);
+		exit (EXIT_FAILURE);
 	}
 }
 
@@ -593,22 +529,21 @@ int	main(int argc, char **argv)
 	}
 	init_game(&data, argv[1]);
 	count_size_map(&data);
-	// close(data.fd);
 	data.map = create_map(&data);
 	player_initial_position(&data);
 	data.temp_map = create_map(&data);
 	check_elements(&data);
 	data.mlx = mlx_init();
-	data.win = mlx_new_window(data.mlx, data.map_width * TILE_SIZE,
-			(data.map_height * TILE_SIZE) + BLACK_BAR_HEIGHT, "So Long");
+	data.win_w = data.map_width * TILE_SIZE;
+	data.win_h = data.map_height * TILE_SIZE;
+	data.win = mlx_new_window(data.mlx, data.win_w, data.win_h + BLACK_BAR_HEIGHT, "So Long");
 	render_moves(&data);
+	//draw_map(&data);
 	mlx_hook(data.win, 2, 1L << 0, handle_keypress, &data);
 	mlx_hook(data.win, 17, 1L << 0, exit_game, &data);
-	mlx_hook(data.win, 12, 1L << 15, handle_expose, &data);
+	mlx_hook(data.win, 12, 1L << 15, draw_map, &data);
 	mlx_loop(data.mlx);
-	draw_map(&data);
-	ft_clean_map(&data, data.map);
-	ft_clean_map(&data, data.temp_map);
+	ft_clean_map(&data);
 	return (0);
 }
 
