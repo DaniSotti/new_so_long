@@ -27,6 +27,7 @@ void	ft_clean_map(t_data *data)
 		free(data->map);
 	}
 
+	i = 0;
 	if (data->temp_map != NULL)
 	{
 		while (i < data->map_height)
@@ -48,6 +49,8 @@ void	ft_clean_map(t_data *data)
         mlx_destroy_display(data->mlx);
 		free(data->mlx);
     }
+	// if (data->fd > 0)
+	// 	close(data->fd);
 	// free(data->mlx);
 	// if (data->map_path != NULL)
 	// {
@@ -347,7 +350,7 @@ void	valid_character(t_data *data)
 	if ((data->player_count != 1 || data->exit_count != 1
 			|| data->collectible_count == 0))
 	{
-		ft_printf("%d, %d, %d", data->map_height, data->exit_count, data->collectible_count);
+		// ft_printf("%d, %d, %d", data->map_height, data->exit_count, data->collectible_count);
 		ft_printf("Something wrong.\n");
 		// ft_clean_map(data, data->map);
 		exit (EXIT_FAILURE);
@@ -364,56 +367,91 @@ void	count_size_map(t_data *data)
 {
 	char	*line;
 	int		line_length;
+	int	fd;
 
 	line_length = 0;
 	data->map_width = 0;
 	data->map_height = 0;
-	line = get_next_line(data->fd);
+	fd = open_map_file(data);
+	line = get_next_line(fd);
 	while (line)
 	{
 		while (line[line_length] != '\0' && line[line_length] != '\n')
 			line_length++;
-		if (line[line_length] == '\n')
-		 	line_length--;
+		// if (line[line_length] == '\n')
+		//  	line_length--;
 		if (data->map_width > 0 && line_length != data->map_width)
 		{
 			ft_printf("Map Error \n");
-			// ft_clean_map(data, data->map);
+			ft_clean_map(data);
+			// close(data->fd);
 			exit(EXIT_FAILURE);
 		}
 		data->map_width = line_length;
 		data->map_height++;
 		free(line);
-		line = get_next_line(data->fd);
+		line = get_next_line(fd);
 	}
 	free(line);
+	close(fd);
 }
 
-char	**create_map(t_data *data)
+void	create_map(t_data *data)
 {
-	char	**map;
+	// char	**map;
 	char	*line;
 	int		i;
+	int	fd;
 
-	map = (char **)malloc((data->map_height + 1) * sizeof(char *));
-	if (!map)
-		return (NULL);
-	data->fd = open(data->map_path, O_RDONLY);
+	data->map = (char **)malloc((data->map_height + 1) * sizeof(char *));
+	if (!data->map)
+		exit (1);
+	// data->fd = open(data->map_path, O_RDONLY);
+	fd = open_map_file(data);
 	i = 0;
-	line = get_next_line(data->fd);
+	line = get_next_line(fd);
 	while (i < data->map_height && (line))
 	{
-		map[i] = ft_strdup(line);
+		data->map[i] = ft_strdup(line);
 		free(line);
-		if (!map[i])
-			return (NULL);
+		if (!data->map[i])
+			exit (1);
 		i++;
-		line = get_next_line(data->fd);
+		line = get_next_line(fd);
 	}
 	free(line);
-	close(data->fd);
-	map[i] = NULL;
-	return (map);
+	close(fd);
+	data->map[i] = NULL;
+	// return (map);
+}
+
+void	create_map_test(t_data *data)
+{
+	// char	**map;
+	char	*line;
+	int		i;
+	int fd;
+
+	data->temp_map = (char **)malloc((data->map_height + 1) * sizeof(char *));
+	if (!data->temp_map)
+		exit (1);
+	fd = open_map_file(data);
+	// data->fd = open(data->map_path, O_RDONLY);
+	i = 0;
+	line = get_next_line(fd);
+	while (i < data->map_height && (line))
+	{
+		data->temp_map[i] = ft_strdup(line);
+		free(line);
+		if (!data->temp_map[i])
+			exit (1);
+		i++;
+		line = get_next_line(fd);
+	}
+	free(line);
+	close(fd);
+	data->temp_map[i] = NULL;
+	// return (map);
 }
 
 void	player_initial_position(t_data *data)
@@ -464,18 +502,21 @@ void	check_path(t_data *data, int x, int y)
 		mark_path(data, x, y);
 }
 
-// int open_map_file(char *map_name, char **map_path) {
-//     char *s = ft_strjoin("maps/", map_name);
-//     *map_path = ft_strjoin(s, ".ber");
-//     free(s);
+int open_map_file(t_data *data)
+{
+    // char *s = ft_strjoin("maps/", map_name);
+    //  *map_path = ft_strjoin(s, ".ber");
+    //  free(s);
+	int fd;
 
-//     int fd = open(*map_path, O_RDONLY);
-//     if (fd == -1) {
-//         ft_printf("Error opening the map file.\n");
-//         exit(1);
-//     }
-//     return fd;
-// }
+     fd = open(data->map_path, 0, O_RDONLY);
+     if (fd < 0)
+	 {
+         ft_printf("Error opening the map file.\n");
+         exit(1);
+     }
+     return (fd);
+}
 
 void	init_game(t_data *data, char *map_name)
 {
@@ -494,14 +535,15 @@ void	init_game(t_data *data, char *map_name)
 		// free(data->map_path);
 		exit (EXIT_FAILURE);
 	}
-	data->fd = open(data->map_path, O_RDONLY);
-	if (data->fd == -1)
-	{
-		ft_printf("Error opening the map file.\n");
-		close(data->fd);
-		free(data->map_path);
-		exit (EXIT_FAILURE);
-	}
+	// data->fd = open(data->map_path, O_RDONLY);
+	// if (data->fd == -1)
+	// {
+	// 	ft_printf("Error opening the map file.\n");
+	// 	close(data->fd);
+	// 	free(data->map_path);
+	// 	exit (EXIT_FAILURE);
+	// }
+	// close(data->fd);
 }
 
 void	check_elements(t_data *data)
@@ -529,9 +571,9 @@ int	main(int argc, char **argv)
 	}
 	init_game(&data, argv[1]);
 	count_size_map(&data);
-	data.map = create_map(&data);
+	create_map(&data);
 	player_initial_position(&data);
-	data.temp_map = create_map(&data);
+	create_map_test(&data);
 	check_elements(&data);
 	data.mlx = mlx_init();
 	data.win_w = data.map_width * TILE_SIZE;

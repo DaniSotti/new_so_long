@@ -60,7 +60,9 @@ void    ft_clean_map(t_data *data);
 int     exit_game(t_data *data);
 void    count_size_map(t_data *data);
 
-char	**create_map(t_data *data);
+// char	**create_map(t_data *data);
+void	create_map(t_data *data);
+void	create_map_test(t_data *data);
 int     draw_map(t_data *data);
 void	draw_image(t_data *data, char *image_path, int x, int y);
 void	draw_new_exit(t_data *data);
@@ -82,5 +84,7 @@ void	check_path(t_data *data, int x, int y);
 
 void	player_initial_position(t_data *data);
 void	init_game(t_data *data, char *map_name);
+
+int open_map_file(t_data *data);
 
 #endif
