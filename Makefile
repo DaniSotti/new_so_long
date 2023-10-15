@@ -23,7 +23,7 @@ MLXFLAGS = -Lmlx_linux -lmlx_Linux -L/usr/lib -Imlx_linux -lXext -lX11 -lm -lz
 MLX_LINUX = -I/usr/include -Imlx_linux -O3
 
 # .c files
-SOURCE = main
+SOURCE = src/main src/utils src/map src/moves src/check src/utils2
 
 # Transform .c files to .o files
 C_SOURCE = $(SOURCE:%=%.c)
