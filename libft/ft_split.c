@@ -84,7 +84,7 @@ char	**ft_split(char const *s, char c)
 	{
 		len = 0;
 		while (s[i] != '\0' && s[i] == c)
-				i++;
+			i++;
 		len = word_len(s, i, c);
 		strsplit[j] = ft_substrncpy(s, i, len);
 		j++;

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/so_long.h"
+#include "include/so_long.h"
 
 void	ft_clean_window(t_data *data)
 {
@@ -75,8 +75,6 @@ void	count_size_map(t_data *data)
 		data->length = 0;
 		while (line[data->length] != '\0' && line[data->length] != '\n')
 			data->length++;
-		if (line[data->length] == '\n')
-			data->length--;
 		if (data->map_width > 0 && data->length != data->map_width)
 		{
 			free(line);

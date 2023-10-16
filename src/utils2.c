@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/so_long.h"
+#include "include/so_long.h"
 
 void	create_window(t_data *data)
 {

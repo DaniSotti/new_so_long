@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/so_long.h"
+#include "include/so_long.h"
 
 void	render_moves(t_data *data)
 {
@@ -26,14 +26,14 @@ void	render_moves(t_data *data)
 	prev_mov_char = ft_itoa(data->prev_mov_int);
 	mlx_string_put(data->mlx, data->win, moves_x + moves_str_width + 10,
 		moves_y, 0x000000, prev_mov_char);
-	mlx_string_put(data->mlx, data->win, moves_x, moves_y, 0xFFFFFF, "Moves:");
+	mlx_string_put(data->mlx, data->win, moves_x, moves_y, 0x48D1CC, "Moves:");
 	moves_str = ft_itoa(data->moves);
 	data->prev_mov_int = data->moves;
 	if (data->prev_mov_int > 0)
 		ft_printf("MOVES: %d\n", data->moves);
 	data->moves++;
 	mlx_string_put(data->mlx, data->win, moves_x + moves_str_width + 10,
-		moves_y, 0xFFFFFF, moves_str);
+		moves_y, 0x48D1CC, moves_str);
 	free(moves_str);
 	free(prev_mov_char);
 }

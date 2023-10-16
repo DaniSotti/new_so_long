@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/so_long.h"
+#include "include/so_long.h"
 
 void	player_initial_position(t_data *data)
 {
@@ -51,7 +51,7 @@ void	init_game(t_data *data, char *map_name)
 	free(s);
 	if (data->map_path == NULL)
 	{
-		ft_printf("Error creating map path\n");
+		ft_printf("Error creating map path.\n");
 		exit (EXIT_FAILURE);
 	}
 	count_size_map(data);
@@ -65,14 +65,14 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 	{
-		ft_printf("you need to choose the map name \n");
+		ft_printf("you need to choose the map name.\n");
 		return (1);
 	}
 	init_game(&data, argv[1]);
 	check_elements(&data);
 	create_window(&data);
 	render_moves(&data);
-	mlx_hook(data.win, 12, 1L << 15, draw_map, &data);
+	mlx_hook(data.win, 12, 0, draw_map, &data);
 	mlx_hook(data.win, 2, 1L << 0, handle_keypress, &data);
 	mlx_hook(data.win, 17, 1L << 0, exit_game, &data);
 	mlx_loop(data.mlx);
